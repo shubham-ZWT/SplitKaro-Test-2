@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -25,9 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      group_id: {
-        type: DataTypes.INTEGER,
-      },
+      group_id: DataTypes.INTEGER,
       name: DataTypes.STRING,
       email: DataTypes.STRING,
       phone: DataTypes.STRING,
