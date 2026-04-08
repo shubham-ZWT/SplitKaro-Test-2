@@ -54,9 +54,46 @@ exports.getGroupBalancesData = async (groupId) => {
     // ],
   });
 
-  console.log(members);
+  const membersExpense = [];
+  for (const member of members) {
+    console.log(member.id);
+    const memberExpense = await Expense.sum("amount", {
+      where: { group_id: groupId, paid_by: member.id },
+    });
 
-  return members;
+    const expenseIds = await Expense.findAll({
+      attributes: ["id"],
+      where: {
+        group_id: groupId,
+      },
+      raw: true,
+    });
+    // console.log(expenseIds.map((a) => a.id));
+    const expenIdsArr = expenseIds.map((a) => a.id);
+
+    const expenseGiveBack = await ExpenseSplit.sum("amount_owed", {
+      where: {
+        expense_id: expenIdsArr,
+        member_id: member.id,
+      },
+    });
+    const memberBalance = memberExpense - expenseGiveBack;
+    console.log("member expanse did", memberExpense);
+    console.log("give back", expenseGiveBack);
+    console.log("balance ", memberBalance);
+
+    membersExpense.push({
+      member_id: member.id,
+      expense: memberExpense,
+      balance: memberBalance,
+    });
+    // console.log(member);
+    // member.map((m) => ({ ...m, expense: memberExpense }));
+  }
+
+  // console.log(members);
+
+  return { members, membersExpense };
 };
 
 exports.addGroupExpenseData = async (groupId, data) => {

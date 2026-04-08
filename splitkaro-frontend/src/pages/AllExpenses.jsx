@@ -43,51 +43,53 @@ export default function AllExpenses() {
 
   console.log(expenses);
   return (
-    <div>
-      <label htmlFor="groupIds">Select group id to see the Expenses</label>
-      <select
-        name="groupIds"
-        id="groupIds"
-        onchange={(e) => handlegroupIdChange(e)}
-      >
-        <option value="">Select Group Id</option>
-        {groupIds.map((grp) => (
-          <option key={grp.id} value={grp.id}>
-            {grp.id}
-          </option>
-        ))}
-      </select>
-
-      <table>
-        <thead className="">
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Paid By</th>
-            <th>Amount</th>
-            <th>Split Type</th>
-          </tr>
-        </thead>
-        <tbody className="">
-          {expenses.map((expense) => (
-            <tr key={expense.id} className="">
-              <td>{expense.date.slice(0, 10)}</td>
-              <td>{expense.description}</td>
-              <td>{expense.paid_by}</td>
-              <td>{expense.amount}</td>
-              <td>{expense.split_type}</td>
-              <td>
-                <button
-                  className="bg-red-50 text-red-800 px-3 py-1 rounded-lg"
-                  onClick={() => handleDeleteExpense(expense.id)}
-                >
-                  Delete Expense
-                </button>
-              </td>
-            </tr>
+    <div className="max-w-7xl mx-auto">
+      <div>
+        <label htmlFor="groupIds">Select group id to see the Expenses</label>
+        <select
+          name="groupIds"
+          id="groupIds"
+          onChange={(e) => handlegroupIdChange(e)}
+        >
+          <option value="">Select Group Id</option>
+          {groupIds.map((grp) => (
+            <option key={grp.id} value={grp.id}>
+              {grp.id}
+            </option>
           ))}
-        </tbody>
-      </table>
+        </select>
+
+        <table>
+          <thead className="">
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Paid By</th>
+              <th>Amount</th>
+              <th>Split Type</th>
+            </tr>
+          </thead>
+          <tbody className="">
+            {expenses.map((expense) => (
+              <tr key={expense.id} className="">
+                <td>{expense.date.slice(0, 10)}</td>
+                <td>{expense.description}</td>
+                <td>{expense.paid_by}</td>
+                <td>{expense.amount}</td>
+                <td>{expense.split_type}</td>
+                <td>
+                  <button
+                    className="bg-red-50 text-red-800 px-3 py-1 rounded-lg"
+                    onClick={() => handleDeleteExpense(expense.id)}
+                  >
+                    Delete Expense
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
