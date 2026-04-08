@@ -5,11 +5,13 @@ const {
   getGroupBalances,
   addGroupExpense,
   deleteExpense,
-  addGroup
+  addGroup,
+  getGroupIds,
 } = require("../controllers/group.controller");
 
 const router = express.Router();
 
+router.get("/groups", getGroupIds);
 router.get("/groups/:id", getGroupDetails);
 router.get("/groups/:id/expenses", getGroupExpenses);
 router.get("/groups/:id/balances", getGroupBalances);

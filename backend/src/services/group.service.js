@@ -191,3 +191,13 @@ exports.addGroupData = async (groupData) => {
     await t.rollback();
   }
 };
+
+exports.getGroupIdsData = async () => {
+  const groupIds = await Group.findAll({
+    attributes: ["id"],
+  });
+
+  console.log(groupIds);
+
+  return groupIds;
+};
