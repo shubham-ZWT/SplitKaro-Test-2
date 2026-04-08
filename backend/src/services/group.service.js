@@ -162,3 +162,32 @@ exports.deleteExpenseData = async (expenseId) => {
     await t.rollback();
   }
 };
+
+exports.addGroupData = async (groupData) => {
+  const t = await sequelize.transaction();
+
+  try {
+    const group = await Group.create(
+      {
+        name: groupData.group_name,
+        description: groupData.group_description,
+      },
+      { transaction: t },
+    );
+
+    console.log(groupData.group_members);
+    const bulkMembers = groupData.group_members.map((o) => ({
+      group_id: group.id,
+      ...o,
+    }));
+    console.log("logging bulk members:", bulkMembers);
+
+    await Member.bulkCreate(bulkMembers, { transaction: t });
+
+    await t.commit();
+
+    return group;
+  } catch (error) {
+    await t.rollback();
+  }
+};

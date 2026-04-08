@@ -4,6 +4,7 @@ const {
   getGroupBalancesData,
   addGroupExpenseData,
   deleteExpenseData,
+  addGroupData,
 } = require("../services/group.service");
 
 exports.getGroupDetails = async (req, res) => {
@@ -57,4 +58,13 @@ exports.deleteExpense = async (req, res) => {
   res
     .status(200)
     .json({ message: "Deleted Expense and Splits", deletedExpenseId });
+};
+
+exports.addGroup = async (req, res) => {
+  const groupData = req.body;
+  console.log(groupData);
+
+  const addGroup = await addGroupData(groupData);
+
+  res.status(200).json({ message: "Adding Group with Member", addGroup });
 };
