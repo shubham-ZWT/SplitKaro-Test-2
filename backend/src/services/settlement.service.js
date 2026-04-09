@@ -128,13 +128,18 @@ exports.getSettlementHistory = async (groupId) => {
       include: [
         {
           model: Member,
+          as: "paidBy",
+          attributes: ["id", "name"],
+        },
+        {
+          model: Member,
+          as: "paidTo",
           attributes: ["id", "name"],
         },
       ],
-      raw: true,
     });
 
-    console.log(settHistory)
+    console.log(settHistory);
 
     return settHistory;
   } catch (error) {

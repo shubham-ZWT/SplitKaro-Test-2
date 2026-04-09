@@ -84,7 +84,7 @@ export default function AllExpenses() {
                 <td>{expense.split_type}</td>
                 <td>
                   <button
-                    className="bg-red-50 text-red-800 px-3 py-1 rounded-lg"
+                    className="bg-red-50 text-red-800 px-3 py-1 rounded-lg mt-4"
                     onClick={() => handleDeleteExpense(expense.id)}
                   >
                     Delete Expense

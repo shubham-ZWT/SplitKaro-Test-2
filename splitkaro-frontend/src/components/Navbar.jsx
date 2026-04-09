@@ -6,6 +6,7 @@ export default function Navbar() {
     { name: "Dashboard", link: "/" },
     { name: "Add Expense", link: "/add-expense" },
     { name: "All Expenses", link: "/expenses" },
+    { name: "Settle Up", link: "/settle" },
   ];
   return (
     <div className="bg-gray-900 text-white py-4">
@@ -15,7 +16,9 @@ export default function Navbar() {
 
           <div className="flex flex-row gap-3">
             {navLinks.map((l) => (
-              <Link className="" to={l.link}>{l.name}</Link>
+              <Link className="" to={l.link}>
+                {l.name}
+              </Link>
             ))}
           </div>
         </div>

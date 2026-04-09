@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import groupExpenseService from "../services/groupExpense.service";
+import groupSettlementService from "../services/settlement.service";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [groupIds, setGroupIds] = useState([]);
@@ -8,6 +10,9 @@ export default function Dashboard() {
   const [groupExpense, setGroupexpense] = useState([]);
   const [groupData, setGroupData] = useState([]);
   const [groupMemberBalance, setGroupMemberBalance] = useState([]);
+  const [pendingSettlements, setPendingSettlements] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGroupIds = async () => {
@@ -18,6 +23,16 @@ export default function Dashboard() {
 
     fetchGroupIds();
   }, []);
+  useEffect(() => {
+    const fetchPendingSettlements = async () => {
+      const data =
+        await groupSettlementService.getPendingSettlement(selectedId);
+
+      setPendingSettlements(data?.suggest);
+    };
+
+    fetchPendingSettlements();
+  }, [selectedId]);
 
   useEffect(() => {
     const fetchGroupExpenseData = async () => {
@@ -95,6 +110,38 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+          <div className="w-2xl justify-center mt-3 mb-3">
+            <table className="table-auto w-full mt-5">
+              <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody className="">
+                {pendingSettlements.map((ps) => (
+                  <tr>
+                    <td>{ps?.from?.member_name}</td>
+                    <td>{ps?.to?.member_name}</td>
+
+                    <td>{ps?.amount}</td>
+                    <td>
+                      <button
+                        onClick={(e) => {
+                          navigate("/settle");
+                        }}
+                        className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
+                      >
+                        Settle Payments
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="flex justify-between bg-blue-50 rounded-lg border-b border-blue-800 p-3 font-semibold">
@@ -144,12 +191,16 @@ export default function Dashboard() {
               </thead>
               <tbody className="">
                 {groupExpense.map((expense) => (
-                  <tr key={expense.id} className="mt-6 bg-gray-50">
+                  <tr key={expense.id} className=" ">
                     <td>{expense.date.slice(0, 10)}</td>
                     <td>{expense.description}</td>
                     <td>{expense?.Member?.name}</td>
                     <td>{expense.amount}</td>
-                    <td>{expense.split_type}</td>
+                    <td className="mt-6">
+                      <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
+                        {expense.split_type}
+                      </p>
+                    </td>
                   </tr>
                 ))}
               </tbody>

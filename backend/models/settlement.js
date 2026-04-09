@@ -12,9 +12,9 @@ module.exports = (sequelize, DataTypes) => {
 
       Settlement.belongsTo(models.Group, { foreignKey: "group_id" });
 
-      Settlement.belongsTo(models.Member, { foreignKey: "paid_by" });
+      Settlement.belongsTo(models.Member, { foreignKey: "paid_by", as:"paidBy" });
 
-      Settlement.belongsTo(models.Member, { foreignKey: "paid_to" });
+      Settlement.belongsTo(models.Member, { foreignKey: "paid_to", as:"paidTo" });
     }
   }
   Settlement.init(
