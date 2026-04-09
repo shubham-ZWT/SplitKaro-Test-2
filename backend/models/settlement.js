@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+
+      Settlement.belongsTo(models.Group, { foreignKey: "group_id" });
+
+      Settlement.belongsTo(models.Member, { foreignKey: "paid_by" });
+
+      Settlement.belongsTo(models.Member, { foreignKey: "paid_to" });
     }
   }
   Settlement.init(

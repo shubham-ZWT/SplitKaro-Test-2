@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.Expense, { foreignKey: "paid_by" });
 
       Member.hasMany(models.ExpenseSplit, { foreignKey: "member_id" });
+
+      Member.hasMany(models.Settlement, { foreignKey: "paid_by" });
+
+      Member.hasMany(models.Settlement, { foreignKey: "paid_to" });
     }
   }
   Member.init(

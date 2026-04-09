@@ -11,6 +11,7 @@ const {
 const {
   suggestSettlements,
   settlePayment,
+  settlementHistory
 } = require("../controllers/settlement.controller");
 
 const router = express.Router();
@@ -28,5 +29,6 @@ router.delete("/expenses/:id", deleteExpense);
 //setlements
 router.get("/groups/:id/settlements/suggest", suggestSettlements);
 router.post("/groups/:id/settlements", settlePayment);
+router.get("/groups/:id/settlements", settlementHistory);
 
 module.exports = router;

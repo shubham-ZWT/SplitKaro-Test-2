@@ -1,10 +1,13 @@
+const { where } = require("sequelize");
 const {
   Group,
   Member,
   Expense,
   ExpenseSplit,
+  Settlement,
   sequelize,
 } = require("../../models/index");
+const { raw } = require("express");
 
 exports.getSettelementSuggest = async (groupId) => {
   const members = await Member.findAll({
@@ -99,4 +102,43 @@ exports.getSettelementSuggest = async (groupId) => {
 
   console.log("Creditord", creditors, "debtors", debtors);
   return settlementSuggest;
+};
+
+exports.addSettlement = async (groupId, data) => {
+  try {
+    const settlement = Settlement.create({
+      group_id: groupId,
+      paid_by: data.paid_by,
+      paid_to: data.paid_to,
+      amount: data.amount,
+      date: data.date,
+    });
+
+    return settlement;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.getSettlementHistory = async (groupId) => {
+  try {
+    const settHistory = await Settlement.findAll({
+      where: {
+        group_id: groupId,
+      },
+      include: [
+        {
+          model: Member,
+          attributes: ["id", "name"],
+        },
+      ],
+      raw: true,
+    });
+
+    console.log(settHistory)
+
+    return settHistory;
+  } catch (error) {
+    console.log(error);
+  }
 };
