@@ -19,7 +19,7 @@ app.get("/health", (req, res) => {
 app.use("/api", groupRoutes);
 
 //error handler
-app.use(errorHandler);
+// app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

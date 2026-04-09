@@ -8,6 +8,10 @@ const {
   addGroup,
   getGroupIds,
 } = require("../controllers/group.controller");
+const {
+  suggestSettlements,
+  settlePayment,
+} = require("../controllers/settlement.controller");
 
 const router = express.Router();
 
@@ -20,5 +24,9 @@ router.post("/groups", addGroup);
 router.post("/groups/:id/expenses", addGroupExpense);
 
 router.delete("/expenses/:id", deleteExpense);
+
+//setlements
+router.get("/groups/:id/settlements/suggest", suggestSettlements);
+router.post("/groups/:id/settlements", settlePayment);
 
 module.exports = router;

@@ -14,7 +14,7 @@ exports.getGroupData = async (groupId) => {
     where: { group_id: groupId },
   });
 
-  return { group, members };
+  return {members };
 };
 
 exports.getGroupExpensesData = async (groupId) => {
@@ -87,6 +87,7 @@ exports.getGroupBalancesData = async (groupId) => {
 
     membersExpense.push({
       member_id: member.id,
+      // member_name:member.name,
       expense: memberExpense,
       balance: memberBalance,
     });
