@@ -7,7 +7,6 @@ const {
   Settlement,
   sequelize,
 } = require("../../models/index");
-const { raw } = require("express");
 
 exports.getSettelementSuggest = async (groupId) => {
   const members = await Member.findAll({
