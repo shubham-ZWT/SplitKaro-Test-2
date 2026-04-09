@@ -34,10 +34,10 @@ export default function AllExpenses() {
     }
   };
 
-  const handlegroupIdChange = (event) => {
-    console.log(event.target.value);
-    setCurrentGroupId(event.target.value);
-  };
+  // const handlegroupIdChange = (event) => {
+  //   console.log(event.target.value);
+  //   setCurrentGroupId(event.target.value);
+  // };
 
   console.log(groupIds);
 
@@ -45,36 +45,41 @@ export default function AllExpenses() {
   return (
     <div className="max-w-7xl mx-auto">
       <div>
-        <label htmlFor="groupIds">Select group id to see the Expenses</label>
-        <select
-          name="groupIds"
-          id="groupIds"
-          onChange={(e) => handlegroupIdChange(e)}
-        >
-          <option value="">Select Group Id</option>
-          {groupIds.map((grp) => (
-            <option key={grp.id} value={grp.id}>
-              {grp.id}
-            </option>
-          ))}
-        </select>
+        <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
+          <label htmlFor="groupId">Change Group Id : </label>
+          <select
+            className=" border border-amber-700 px-2 rounded-lg"
+            name=""
+            id="groupId"
+            value={currentGroupId}
+            onChange={(e) => {
+              setCurrentGroupId(e.target.value);
+            }}
+          >
+            <option value="">Group Id</option>
+            {groupIds.map((id) => (
+              <option value={id.id}>{id.name}</option>
+            ))}
+          </select>
+        </div>
 
-        <table>
-          <thead className="">
+        <table className="table-auto w-full mt-5">
+          <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
             <tr>
               <th>Date</th>
               <th>Description</th>
               <th>Paid By</th>
               <th>Amount</th>
               <th>Split Type</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody className="">
             {expenses.map((expense) => (
-              <tr key={expense.id} className="">
+              <tr key={expense.id} className="bg-card mt-6 ">
                 <td>{expense.date.slice(0, 10)}</td>
                 <td>{expense.description}</td>
-                <td>{expense.paid_by}</td>
+                <td>{expense.Member?.name}</td>
                 <td>{expense.amount}</td>
                 <td>{expense.split_type}</td>
                 <td>

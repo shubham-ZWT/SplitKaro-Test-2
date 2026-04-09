@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 
 const groupRoutes = require("./routes/group.routes");
+const { errorHandler } = require("./middlewares/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -16,6 +17,9 @@ app.get("/health", (req, res) => {
 
 // Group Routes
 app.use("/api", groupRoutes);
+
+//error handler
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

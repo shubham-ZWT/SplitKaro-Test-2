@@ -8,12 +8,15 @@ const {
   getGroupIdsData,
 } = require("../services/group.service");
 
-exports.getGroupDetails = async (req, res) => {
+exports.getGroupDetails = async (req, res, next) => {
   const groupId = req.params.id;
 
-  const { group, members } = await getGroupData(Number(groupId));
-
-  res.status(200).json({ message: "get group data", group, members });
+  try {
+    const { group, members } = await getGroupData(Number(groupId));
+    res.status(200).json({ message: "get group data", group, members });
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.getGroupExpenses = async (req, res) => {

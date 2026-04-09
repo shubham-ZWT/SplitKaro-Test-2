@@ -6,13 +6,11 @@ const {
   ExpenseSplit,
   sequelize,
 } = require("../../models/index");
-const { raw } = require("express");
+
 
 exports.getGroupData = async (groupId) => {
-  const group = await Group.findByPk(groupId);
-
   const members = await Member.findAll({
-    attributes: ["name", "email", "phone"],
+    attributes: ["id", "name", "email", "phone"],
     where: { group_id: groupId },
   });
 
@@ -25,6 +23,10 @@ exports.getGroupExpensesData = async (groupId) => {
       {
         model: ExpenseSplit,
         attributes: ["id", "expense_id", "member_id", "amount_owed"],
+      },
+      {
+        model: Member,
+        attributes: ["name"],
       },
     ],
     where: { group_id: groupId },
@@ -70,6 +72,7 @@ exports.getGroupBalancesData = async (groupId) => {
     });
     // console.log(expenseIds.map((a) => a.id));
     const expenIdsArr = expenseIds.map((a) => a.id);
+    console.log(expenIdsArr);
 
     const expenseGiveBack = await ExpenseSplit.sum("amount_owed", {
       where: {
@@ -107,7 +110,7 @@ exports.addGroupExpenseData = async (groupId, data) => {
     0,
   );
 
-  if (splitType === "equal" || splitType === "exact") {
+  if (splitType === "exact") {
     if (Number(totalAmount) !== Number(totalOfSplits)) {
       throw new Error("Invalid Total Amount does not match with splits ");
     }
@@ -126,6 +129,23 @@ exports.addGroupExpenseData = async (groupId, data) => {
   const t = await sequelize.transaction();
 
   const splitArray = Object.entries(data.splits);
+  console.log(splitArray);
+
+  // logic to handle extra paisa
+  if (splitType === "equal") {
+    const totalAmountPaisa = Math.round(totalAmount * 100);
+    const pershare = Math.floor(totalAmountPaisa / splitArray.length);
+    const extraPaisaRemainder = totalAmountPaisa % splitArray.length;
+    console.log(totalAmount, pershare, extraPaisaRemainder);
+
+    for (let i = 0; i < splitArray.length; i++) {
+      const memShare = i === 0 ? pershare + extraPaisaRemainder : pershare;
+      console.log(memShare);
+
+      splitArray[i][1] = parseFloat(memShare / 100).toFixed(2);
+    }
+  }
+  console.log("after equal", splitArray);
 
   try {
     const expense = await Expense.create(
@@ -146,15 +166,22 @@ exports.addGroupExpenseData = async (groupId, data) => {
         const tempPercent = split[1];
         split[1] = (totalAmount * tempPercent) / 100;
       }
+
       console.log(split[1]);
+      console.log("entering data from ", i);
       const expenseSplit = await ExpenseSplit.create(
         {
           expense_id: expense.id,
           member_id: Number(split[0]),
           amount_owed: Number(split[1]),
+
+          raw: true,
         },
+
         { transaction: t },
       );
+
+      console.log(expenseSplit);
     }
 
     await t.commit();
@@ -231,7 +258,7 @@ exports.addGroupData = async (groupData) => {
 
 exports.getGroupIdsData = async () => {
   const groupIds = await Group.findAll({
-    attributes: ["id"],
+    attributes: ["id", "name"],
   });
 
   console.log(groupIds);

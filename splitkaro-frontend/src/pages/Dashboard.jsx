@@ -1,33 +1,159 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import groupExpenseService from "../services/groupExpense.service";
 
 export default function Dashboard() {
+  const [groupIds, setGroupIds] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [groupExpense, setGroupexpense] = useState([]);
+  const [groupData, setGroupData] = useState([]);
+  const [groupMemberBalance, setGroupMemberBalance] = useState([]);
+
+  useEffect(() => {
+    const fetchGroupIds = async () => {
+      const data = await groupExpenseService.getGroupId();
+      setGroupIds(data?.groupIds);
+      setSelectedId(data?.groupIds[0]?.id);
+    };
+
+    fetchGroupIds();
+  }, []);
+
+  useEffect(() => {
+    const fetchGroupExpenseData = async () => {
+      const data = await groupExpenseService.getAllExpenses(selectedId);
+      const response = await groupExpenseService.getGroupDataById(selectedId);
+      const grpExp = await groupExpenseService.getgroupBalance(selectedId);
+      setGroupexpense(data?.groupExpenses);
+      setGroupData(response);
+      setGroupMemberBalance(grpExp);
+    };
+
+    fetchGroupExpenseData();
+  }, [selectedId]);
+
+  console.log(groupIds);
+  console.log(groupExpense);
+  console.log(groupData);
+  console.log(groupMemberBalance);
   return (
     <div className="max-w-7xl mx-auto">
+      <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
+        <label htmlFor="groupId">Change Group Id : </label>
+        <select
+          className=" border border-amber-700 px-2 rounded-lg"
+          name=""
+          id="groupId"
+          value={selectedId}
+          onChange={(e) => {
+            setSelectedId(e.target.value);
+          }}
+        >
+          <option value="">Group Id</option>
+          {groupIds.map((id) => (
+            <option value={id.id}>{id.name}</option>
+          ))}
+        </select>
+      </div>
       <div>
         <div>
-          <h2>Grop Name:</h2>
-          <p>Number of members: </p>
+          <h2 className="font-semibold text-2xl">
+            Grop Name: {groupData?.group?.name}
+          </h2>
+          <p className="text-gray-500">
+            (Number of members {groupData?.members?.length}){" "}
+          </p>
         </div>
         <div>
           <div>
-            <h1>MemberName</h1>
-            <p>Member Expense </p>
+            <p className="font-semibold">Member Expense </p>
+            <div className="flex flex-row justify-between gap-4 mb-3">
+              {groupMemberBalance?.groupBalances?.members?.map((gm, index) => (
+                <div className="bg-gray-100 p-4 rounded-lg w-full">
+                  <p>{gm.name}</p>
+                  <p
+                    className={`${
+                      groupMemberBalance?.groupBalances?.membersExpense?.[index]
+                        .balance < 0
+                        ? `text-red-600`
+                        : `text-green-600`
+                    } flex gap-3`}
+                  >
+                    <span>
+                      {groupMemberBalance?.groupBalances?.membersExpense?.[
+                        index
+                      ].balance < 0
+                        ? "Owes"
+                        : "is Owed"}
+                    </span>
+                    {
+                      groupMemberBalance?.groupBalances?.membersExpense?.[index]
+                        .balance
+                    }
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-between">
-          <p>Total Group Expense</p>
-          <p>Total You Paid</p>
-          <p>Net Balance</p>
+        <div className="flex justify-between bg-blue-50 rounded-lg border-b border-blue-800 p-3 font-semibold">
+          <p className="flex items-center gap-2">
+            Total Group Expense :{" "}
+            <span className="text-xl">
+              {groupExpense?.reduce((acc, obj) => {
+                return acc + obj.amount;
+              }, 0)}
+            </span>
+          </p>
+          <p className="flex items-center gap-2">
+            Total You Paid :{" "}
+            <span className="text-xl text-green-700">
+              {groupMemberBalance?.groupBalances?.membersExpense?.[0].expense}
+            </span>
+          </p>
+          <p className="flex items-center gap-2">
+            Your Net Balance :{" "}
+            <span className="text-xl text-green-700">
+              {groupMemberBalance?.groupBalances?.membersExpense?.[0].balance}
+            </span>
+          </p>
         </div>
 
-        <div>
-          <h3>All Expenses</h3>
+        <div className="flex flex-col gap-3 mt-4">
+          <h3 className="text-xl font-semibold">All Expenses</h3>
           <div className="flex flex-row-reverse ">
-            <Link to="/add-expense" className="bg-blue-50 text-blue-800 px-3 py-1 rounded-lg self-end">
+            <Link
+              to="/add-expense"
+              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg self-end font-semibold"
+            >
               Add Expense
             </Link>
+          </div>
+
+          <div className="">
+            <table className="table-auto w-full mt-5">
+              <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Paid By</th>
+                  <th>Amount</th>
+                  <th>Split Type</th>
+                </tr>
+              </thead>
+              <tbody className="">
+                {groupExpense.map((expense) => (
+                  <tr key={expense.id} className="mt-6 bg-gray-50">
+                    <td>{expense.date.slice(0, 10)}</td>
+                    <td>{expense.description}</td>
+                    <td>{expense?.Member?.name}</td>
+                    <td>{expense.amount}</td>
+                    <td>{expense.split_type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
