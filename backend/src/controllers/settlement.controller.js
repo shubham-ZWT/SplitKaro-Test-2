@@ -5,36 +5,37 @@ const {
 } = require("../services/settlement.service");
 
 exports.suggestSettlements = async (req, res, next) => {
-  const groupId = req.params.id;
-
   try {
+    const groupId = req.params.id;
     const suggest = await getSettelementSuggest(groupId);
-    res
-      .status(200)
-      .json({ message: `suggest settlemnts for id ${groupId}`, suggest });
+    res.status(200).json({
+      message: `Pending Settlement Suggestions for the Group `,
+      suggest,
+    });
   } catch (error) {
     next(error);
   }
 };
 
 exports.settlePayment = async (req, res, next) => {
-  const groupId = req.params.id;
-  const data = req.body;
-
   try {
+    const groupId = req.params.id;
+    const data = req.body;
     const settlement = await addSettlement(groupId, data);
-    res.status(200).json({ message: "settlement done", settlement });
+    res.status(200).json({ message: "Settlement Done !!", settlement });
   } catch (error) {
     next(error);
   }
 };
 
 exports.settlementHistory = async (req, res, next) => {
-  const groupId = req.params.id;
-
   try {
+    const groupId = req.params.id;
     const settlementHistoryData = await getSettlementHistory(groupId);
-    res.status(200).json({ message: "settlement history", settlementHistoryData });
+    res.status(200).json({
+      message: "Settlement History of the Group  ",
+      settlementHistoryData,
+    });
   } catch (error) {
     next(error);
   }

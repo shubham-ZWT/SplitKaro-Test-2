@@ -9,75 +9,81 @@ const {
 } = require("../services/group.service");
 
 exports.getGroupDetails = async (req, res, next) => {
-  const groupId = req.params.id;
-
   try {
+    const groupId = req.params.id;
     const { group, members } = await getGroupData(Number(groupId));
-    res.status(200).json({ message: "get group data", group, members });
+    res.status(200).json({ message: "Group Data", group, members });
   } catch (error) {
     next(error);
   }
 };
 
-exports.getGroupExpenses = async (req, res) => {
-  const groupId = req.params.id;
-
-  const groupExpenses = await getGroupExpensesData(Number(groupId));
-
-  res.status(200).json({
-    message: `get getting group expense for ${groupId}`,
-    groupExpenses,
-  });
-};
-
-exports.getGroupBalances = async (req, res) => {
-  const groupId = req.params.id;
-
-  const groupBalances = await getGroupBalancesData(Number(groupId));
-
-  res.status(200).json({
-    message: `get getting group balances for ${groupId}`,
-    groupBalances,
-  });
-};
-
-exports.addGroupExpense = async (req, res) => {
-  const groupId = req.params.id;
-  const data = req.body;
-
-  console.log(data);
+exports.getGroupExpenses = async (req, res, next) => {
   try {
-    const expense = await addGroupExpenseData(groupId, data);
-    console.log(expense);
-    res.status(200).json({ message: "adding group expense", expense });
+    const groupId = req.params.id;
+    const groupExpenses = await getGroupExpensesData(Number(groupId));
+    res.status(200).json({
+      message: `Here is the Group Expense`,
+      groupExpenses,
+    });
   } catch (error) {
-    res.status(400).json({ message: "error adding expense" });
+    next(error);
   }
 };
 
-exports.deleteExpense = async (req, res) => {
-  const expenseId = req.params.id;
-
-  const deletedExpenseId = await deleteExpenseData(expenseId);
-  res.status(200).json({
-    success: true,
-    message: "Deleted Expense and Splits",
-    deletedExpenseId,
-  });
+exports.getGroupBalances = async (req, res, next) => {
+  try {
+    const groupId = req.params.id;
+    const groupBalances = await getGroupBalancesData(Number(groupId));
+    res.status(200).json({
+      message: `Here is the Group Balance !!`,
+      groupBalances,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.addGroup = async (req, res) => {
-  const groupData = req.body;
-  console.log(groupData);
-
-  const addGroup = await addGroupData(groupData);
-
-  res.status(200).json({ message: "Adding Group with Member", addGroup });
+exports.addGroupExpense = async (req, res, next) => {
+  try {
+    const groupId = req.params.id;
+    const data = req.body;
+    const expense = await addGroupExpenseData(groupId, data);
+    res.status(200).json({ message: "Group Expense Added !!", expense });
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.getGroupIds = async (req, res) => {
-  const groupIds = await getGroupIdsData();
-  console.log(groupIds);
+exports.deleteExpense = async (req, res, next) => {
+  try {
+    const expenseId = req.params.id;
+    const deletedExpenseId = await deleteExpenseData(expenseId);
+    res.status(200).json({
+      success: true,
+      message: "Expense and Expense Splits Deleted !!",
+      deletedExpenseId,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-  res.status(200).json({ message: "Get all group Ids", groupIds });
+exports.addGroup = async (req, res, next) => {
+  try {
+    const groupData = req.body;
+    const addGroup = await addGroupData(groupData);
+    res.status(200).json({ message: "Group Added !!", addGroup });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getGroupIds = async (req, res, next) => {
+  try {
+    const groupIds = await getGroupIdsData();
+    res.status(200).json({ message: "Group Ids !!", groupIds });
+  } catch (error) {
+    next(error);
+  }
 };

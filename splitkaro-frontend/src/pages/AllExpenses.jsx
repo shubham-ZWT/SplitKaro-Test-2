@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import groupExpenseService from "../services/groupExpense.service";
+import { formatCurrency, formatDate } from "../utils/formatter";
 
 export default function AllExpenses() {
   const [groupIds, setGroupIds] = useState([]);
@@ -58,7 +59,7 @@ export default function AllExpenses() {
           >
             <option value="">Group Id</option>
             {groupIds.map((id) => (
-              <option value={id.id}>{id.name}</option>
+              <option key={id.id} value={id.id}>{id.name}</option>
             ))}
           </select>
         </div>
@@ -77,14 +78,18 @@ export default function AllExpenses() {
           <tbody className="">
             {expenses.map((expense) => (
               <tr key={expense.id} className="bg-card mt-6 ">
-                <td>{expense.date.slice(0, 10)}</td>
+                <td>{formatDate(expense.date)}</td>
                 <td>{expense.description}</td>
                 <td>{expense.Member?.name}</td>
-                <td>{expense.amount}</td>
-                <td>{expense.split_type}</td>
+                <td className="font-semibold">{formatCurrency(expense.amount)}</td>
+                <td>
+                  <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
+                    {expense.split_type}
+                  </p>
+                </td>
                 <td>
                   <button
-                    className="bg-red-50 text-red-800 px-3 py-1 rounded-lg mt-4"
+                    className="bg-red-50 text-red-800 px-3 py-1 rounded-lg mt-4 font-semibold cursor-pointer"
                     onClick={() => handleDeleteExpense(expense.id)}
                   >
                     Delete Expense

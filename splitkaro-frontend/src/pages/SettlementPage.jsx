@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import groupExpenseService from "../services/groupExpense.service";
 import groupSettlementService from "../services/settlement.service";
+import { formatCurrency, formatDate } from "../utils/formatter";
 
 export default function SettlementPage() {
   const [groupIds, setGroupIds] = useState([]);
@@ -8,7 +9,8 @@ export default function SettlementPage() {
   const [settleFrom, setSettleFrom] = useState([]);
   const [pendingSettlements, setPendingSettlements] = useState([]);
   const [settlementHistory, setSettlementHistory] = useState([]);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
 
   useEffect(() => {
     const fetchGroupIds = async () => {
@@ -33,6 +35,30 @@ export default function SettlementPage() {
 
     fetchPendingSettlements();
   }, [selectedId]);
+
+  const handleSettlementSubmit = async () => {
+    const data = {
+      paid_by: settleFrom?.from?.member_id,
+      paid_to: settleFrom?.to?.member_id,
+      amount: settleFrom?.amount,
+      date: new Date(),
+    };
+    console.log(data);
+
+    const response = await groupSettlementService.addSettlement(
+      selectedId,
+      data,
+    );
+    console.log("called the settle");
+    console.log(response);
+    if (response.settlement) {
+      setMessage(response.message);
+      setShowMessage(true);
+      setTimeout(() => {
+        setShowMessage(false);
+      }, 2000);
+    }
+  };
 
   console.log(pendingSettlements);
   console.log(settlementHistory);
@@ -80,10 +106,12 @@ export default function SettlementPage() {
                         <td>{ps?.from?.member_name}</td>
                         <td>{ps?.to?.member_name}</td>
 
-                        <td>{ps?.amount}</td>
+                        <td className="font-semibold">
+                          {formatCurrency(ps?.amount)}
+                        </td>
                         <td>
                           <button
-                            onClick={(e) => {
+                            onClick={() => {
                               console.log(ps);
                               setSettleFrom(ps);
                             }}
@@ -113,11 +141,19 @@ export default function SettlementPage() {
                   <tbody className="">
                     {settlementHistory.map((ps) => (
                       <tr>
-                        <td>{ps?.date?.slice(0, 10)}</td>
-                        <td>{ps?.paidBy?.name}</td>
-                        <td>{ps?.paidTo?.name}</td>
+                        <td>
+                          <p className="mt-3">{formatDate(ps?.date)}</p>
+                        </td>
+                        <td>
+                          <p className="mt-3"> {ps?.paidBy?.name}</p>
+                        </td>
+                        <td>
+                          <p className="mt-3">{ps?.paidTo?.name}</p>
+                        </td>
 
-                        <td>{ps?.amount}</td>
+                        <td className="font-semibold">
+                          <p className="mt-3">{formatCurrency(ps?.amount)}</p>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -168,30 +204,11 @@ export default function SettlementPage() {
               </div>
               <button
                 className="bg-blue-100 text-blue-800 font-semibold  px-3 py-1 rounded-lg cursor-pointer"
-                onClick={async (e) => {
-                  const data = {
-                    paid_by: settleFrom?.from?.member_id,
-                    paid_to: settleFrom?.to?.member_id,
-                    amount: settleFrom?.amount,
-                    date: new Date(),
-                  };
-                  console.log(data);
-
-                  const response = await groupSettlementService.addSettlement(
-                    selectedId,
-                    data,
-                  );
-                  console.log("called the settle");
-                  console.log(response);
-                  if (response.settlement) {
-                    setShowSuccess(true);
-                    
-                  }
-                }}
+                onClick={handleSettlementSubmit}
               >
                 Record Payment
               </button>
-              {showSuccess ?? <p>Settlement Recorded</p>}
+              {showMessage && <p>{message}</p>}
             </div>
           </div>
         </div>

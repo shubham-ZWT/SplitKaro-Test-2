@@ -7,12 +7,17 @@ export default function AddExpense() {
   const [groupIds, setGroupIds] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [groupMembers, setGroupMembers] = useState([]);
-  const [splitType, setSplitType] = useState("");
   const [splitTypeShow, setSplitTypeShow] = useState(false);
-  const [description, setDescription] = useState("");
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [paidBy, setPaidBy] = useState(null);
-  const [date, setDate] = useState("");
+  const [message, setMessage] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
+
+  const [form, setForm] = useState({
+    paid_by: "",
+    amount: "",
+    description: "",
+    split_type: "",
+    date: "",
+  });
 
   useEffect(() => {
     const fetchGroupIds = async () => {
@@ -33,31 +38,87 @@ export default function AddExpense() {
     fetchGroupData();
   }, [selectedId]);
 
-  console.log(groupIds);
+  const handleFormDataChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const initialSplits = {};
+  groupMembers?.forEach((obj) => {
+    initialSplits[obj.id] = 0;
+  });
+
+  // let totalSplit = 0;
+
+  const handleSplitAmountChange = (memberId, amount) => {
+    initialSplits[memberId] = amount;
+    console.log(initialSplits);
+    // totalSplit = Object.values(initialSplits).reduce(
+    //   (sum, value) => Number(sum) + Number(value),
+    //   0,
+    // );
+    // console.log(totalSplit);
+  };
+
+  const handleExpenseSubmit = async () => {
+    const data = {
+      paid_by: form.paid_by,
+      amount: form.amount,
+      description: form.description,
+      split_type: form.split_type,
+      date: form.date,
+      splits: initialSplits,
+    };
+    const response = await groupExpenseService.addGroupExpense(
+      selectedId,
+      data,
+    );
+
+    if (response.message) {
+      setMessage(response.message);
+      setShowMessage(true);
+      setTimeout(() => {
+        setShowMessage(false);
+        setMessage("");
+      }, 2000);
+    }
+
+    console.log(response);
+    console.log(form);
+  };
+
+  // const isValid = Number(form.amount) === Number(totalSplit);
+
+  // console.log(totalSplit);
   console.log(groupMembers);
+  console.log(initialSplits);
+
+  const isValid =
+    form.amount > 0 && form.paid_by.length > 0 && form.split_type.length > 0
+      ? true
+      : false;
 
   // const handleAddExpense = () => {};
 
   //handle logic for extra paisa to 1st person
-  const handleExtraEqual = (totalAmount, members) => {
-    const totalAmountPaisa = totalAmount * 100;
-    const eachShare = Math.floor(totalAmountPaisa / members.length);
-    const totalRemainder = totalAmountPaisa % members.length;
+  // const handleExtraEqual = (totalAmount, members) => {
+  //   const totalAmountPaisa = totalAmount * 100;
+  //   const eachShare = Math.floor(totalAmountPaisa / members.length);
+  //   const totalRemainder = totalAmountPaisa % members.length;
 
-    const splits = members.map((mem, index) => {
-      const splitAmount = index === 0 ? eachShare + totalRemainder : eachShare;
+  //   const splits = members.map((mem, index) => {
+  //     const splitAmount = index === 0 ? eachShare + totalRemainder : eachShare;
 
-      const splitInRup = Math.floor(splitAmount);
-      return { id: mem.id, split: splitInRup };
-    });
+  //     const splitInRup = Math.floor(splitAmount);
+  //     return { id: mem.id, split: splitInRup };
+  //   });
 
-    return splits;
-  };
+  //   return splits;
+  // };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto mt-4">
       <div>
-        <h1>Add Expenses</h1>
+        <h1 className="text-2xl font-bold">Add Expenses</h1>
         <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
           <label htmlFor="groupId">Change Group Id : </label>
           <select
@@ -71,7 +132,7 @@ export default function AddExpense() {
           >
             <option value="">Group Id</option>
             {groupIds.map((id) => (
-              <option value={id.id}>{id.id}</option>
+              <option value={id.id}>{id.name}</option>
             ))}
           </select>
         </div>
@@ -83,9 +144,10 @@ export default function AddExpense() {
               <input
                 type="text"
                 id="description"
+                name="description"
                 className=" border border-gray-500"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={form.description}
+                onChange={handleFormDataChange}
               />
             </div>
 
@@ -94,17 +156,18 @@ export default function AddExpense() {
               <input
                 type="text"
                 id="totalAmount"
+                name="amount"
+                onChange={handleFormDataChange}
                 className=" border border-gray-500"
-                value={totalAmount}
-                onChange={(e) => setTotalAmount(Number(e.target.value))}
               />
             </div>
+
             <div>
               <label id="paidBy">Paid By : </label>
               <select
-                name="paidBy"
+                name="paid_by"
                 id="paidBy"
-                onChange={(e) => setPaidBy(Number(e.target.value))}
+                onChange={handleFormDataChange}
               >
                 <option value="">Select Paid By</option>
                 {groupMembers.map((gm) => (
@@ -117,20 +180,17 @@ export default function AddExpense() {
           <div className="flex gap-2">
             <div className="flex flex-row gap-3">
               <label htmlFor="date">Date :</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              />
+              <input type="date" name="date" onChange={handleFormDataChange} />
             </div>
 
             <div className="flex gap-3">
               <label htmlFor="splitType">Select Split type</label>
               <select
                 className="border border-gray-700"
-                name="splitType"
+                name="split_type"
                 id="splitType"
                 onChange={(e) => {
+                  handleFormDataChange(e);
                   if (
                     e.target.value === "percentage" ||
                     e.target.value === "exact"
@@ -139,8 +199,6 @@ export default function AddExpense() {
                   } else {
                     setSplitTypeShow(false);
                   }
-
-                  setSplitType(e.target.value);
                 }}
               >
                 <option value="">---type---</option>
@@ -161,6 +219,9 @@ export default function AddExpense() {
                     name="exactAmount"
                     id=""
                     className="bg-gray-100 border border-gray-200"
+                    onChange={(e) =>
+                      handleSplitAmountChange(gm.id, e.target.value)
+                    }
                   />
                 </div>
               ))}
@@ -168,10 +229,15 @@ export default function AddExpense() {
           )}
 
           <div>
-            <button className="bg-green-100 text-green-800 font-semibold px-2 py-1 rounded-lg">
+            <button
+              className="bg-green-100 text-green-800 font-semibold px-2 py-1 rounded-lg"
+              onClick={handleExpenseSubmit}
+              disabled={!isValid}
+            >
               Save Expense
             </button>
           </div>
+          {showMessage && <p>{message}</p>}
         </div>
       </div>
     </div>

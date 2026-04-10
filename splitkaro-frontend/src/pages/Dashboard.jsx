@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import groupExpenseService from "../services/groupExpense.service";
 import groupSettlementService from "../services/settlement.service";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency, formatDate } from "../utils/formatter";
 
 export default function Dashboard() {
   const [groupIds, setGroupIds] = useState([]);
@@ -51,6 +52,11 @@ export default function Dashboard() {
   console.log(groupExpense);
   console.log(groupData);
   console.log(groupMemberBalance);
+  console.log(
+    groupIds?.filter((gr) => {
+      return gr.id == selectedId;
+    }),
+  );
   return (
     <div className="max-w-7xl mx-auto">
       <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
@@ -73,7 +79,12 @@ export default function Dashboard() {
       <div>
         <div>
           <h2 className="font-semibold text-2xl">
-            Grop Name: {groupData?.group?.name}
+            Grop Name:{" "}
+            {
+              groupIds?.filter((gr) => {
+                return gr.id == selectedId;
+              })[0]?.name
+            }
           </h2>
           <p className="text-gray-500">
             (Number of members {groupData?.members?.length}){" "}
@@ -101,10 +112,10 @@ export default function Dashboard() {
                         ? "Owes"
                         : "is Owed"}
                     </span>
-                    {
+                    {formatCurrency(
                       groupMemberBalance?.groupBalances?.membersExpense?.[index]
-                        .balance
-                    }
+                        .balance,
+                    )}
                   </p>
                 </div>
               ))}
@@ -126,10 +137,10 @@ export default function Dashboard() {
                     <td>{ps?.from?.member_name}</td>
                     <td>{ps?.to?.member_name}</td>
 
-                    <td>{ps?.amount}</td>
+                    <td>{formatCurrency(ps?.amount)}</td>
                     <td>
                       <button
-                        onClick={(e) => {
+                        onClick={() => {
                           navigate("/settle");
                         }}
                         className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
@@ -148,34 +159,42 @@ export default function Dashboard() {
           <p className="flex items-center gap-2">
             Total Group Expense :{" "}
             <span className="text-xl">
-              {groupExpense?.reduce((acc, obj) => {
-                return acc + obj.amount;
-              }, 0)}
+              {formatCurrency(
+                groupExpense?.reduce((sum, obj) => {
+                  return sum + obj.amount;
+                }, 0),
+              )}
             </span>
           </p>
           <p className="flex items-center gap-2">
             Total You Paid :{" "}
             <span className="text-xl text-green-700">
-              {groupMemberBalance?.groupBalances?.membersExpense?.[0].expense}
+              {formatCurrency(
+                groupMemberBalance?.groupBalances?.membersExpense?.[0].expense,
+              )}
             </span>
           </p>
           <p className="flex items-center gap-2">
             Your Net Balance :{" "}
             <span className="text-xl text-green-700">
-              {groupMemberBalance?.groupBalances?.membersExpense?.[0].balance}
+              {formatCurrency(
+                groupMemberBalance?.groupBalances?.membersExpense?.[0].balance,
+              )}
             </span>
           </p>
         </div>
 
         <div className="flex flex-col gap-3 mt-4">
-          <h3 className="text-xl font-semibold">All Expenses</h3>
-          <div className="flex flex-row-reverse ">
-            <Link
-              to="/add-expense"
-              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg self-end font-semibold"
-            >
-              Add Expense
-            </Link>
+          <div className="flex justify-between">
+            <h3 className="text-xl font-semibold">All Expenses</h3>
+            <div className="flex flex-row-reverse ">
+              <Link
+                to="/add-expense"
+                className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg self-end font-semibold"
+              >
+                Add Expense
+              </Link>
+            </div>
           </div>
 
           <div className="">
@@ -192,10 +211,10 @@ export default function Dashboard() {
               <tbody className="">
                 {groupExpense.map((expense) => (
                   <tr key={expense.id} className=" ">
-                    <td>{expense.date.slice(0, 10)}</td>
+                    <td>{formatDate(expense?.date)}</td>
                     <td>{expense.description}</td>
                     <td>{expense?.Member?.name}</td>
-                    <td>{expense.amount}</td>
+                    <td>{formatCurrency(expense?.amount)}</td>
                     <td className="mt-6">
                       <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
                         {expense.split_type}

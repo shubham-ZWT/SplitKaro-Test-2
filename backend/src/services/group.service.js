@@ -9,12 +9,21 @@ const {
 } = require("../../models/index");
 
 exports.getGroupData = async (groupId) => {
-  const members = await Member.findAll({
-    attributes: ["id", "name", "email", "phone"],
-    where: { group_id: groupId },
-  });
+  try {
+    const err = new Error("Server Error, Cannot get the Grop Data");
+    err.statusCode = 400;
+    throw err;
+    const members = await Member.findAll({
+      attributes: ["id", "name", "email", "phone"],
+      where: { group_id: groupId },
+    });
 
-  return { members };
+    return { members };
+  } catch (error) {
+    const err = new Error("Server Error, Cannot get the Grop Data");
+    err.statusCode = 400;
+    throw err;
+  }
 };
 
 exports.getGroupExpensesData = async (groupId) => {
@@ -99,12 +108,12 @@ exports.getGroupBalancesData = async (groupId) => {
 
     let balanceAfterSettlement;
 
-    if (memberBalance >= 0) {
-      balanceAfterSettlement =
-        Number(memberBalance) -
-        Number(parseFloat(settlementPaid || 0).toFixed(2)) +
-        Number(parseFloat(settlementReceived || 0).toFixed(2));
-    }
+    // if (memberBalance >= 0) {
+    //   balanceAfterSettlement =
+    //     Number(memberBalance) -
+    //     Number(parseFloat(settlementPaid || 0).toFixed(2)) +
+    //     Number(parseFloat(settlementReceived || 0).toFixed(2));
+    // }
 
     balanceAfterSettlement =
       Number(memberBalance) +
@@ -147,7 +156,7 @@ exports.addGroupExpenseData = async (groupId, data) => {
 
   console.log(Object.values(allSplits).reduce((sum, value) => sum + value, 0));
   const totalOfSplits = Object.values(allSplits).reduce(
-    (sum, value) => sum + value,
+    (sum, value) => Number(sum) + Number(value),
     0,
   );
 
@@ -159,7 +168,7 @@ exports.addGroupExpenseData = async (groupId, data) => {
 
   if (splitType === "percentage") {
     const percentageTotal = Object.values(data.splits).reduce(
-      (sum, value) => sum + value,
+      (sum, value) => Number(sum) + Number(value),
       0,
     );
 

@@ -12,11 +12,13 @@ export default function Navbar() {
     <div className="bg-gray-900 text-white py-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-row justify-between items-center">
-          <h1 className="text-2xl font-bold">Split Karo</h1>
+          <h1 className="text-2xl font-bold">
+            <Link to={"/"}>Split Karo</Link>
+          </h1>
 
           <div className="flex flex-row gap-3">
             {navLinks.map((l) => (
-              <Link className="" to={l.link}>
+              <Link key={l.name} className="" to={l.link}>
                 {l.name}
               </Link>
             ))}
