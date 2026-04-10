@@ -9,7 +9,7 @@ export default function Navbar() {
     { name: "Settle Up", link: "/settle" },
   ];
   return (
-    <div className="bg-gray-900 text-white py-4">
+    <div className="bg-gray-900 text-white py-4 sticky top-0 z-50 ">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-row justify-between items-center">
           <h1 className="text-2xl font-bold">

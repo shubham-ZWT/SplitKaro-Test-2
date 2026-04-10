@@ -97,61 +97,72 @@ export default function Dashboard() {
               {groupMemberBalance?.groupBalances?.members?.map((gm, index) => (
                 <div className="bg-gray-100 p-4 rounded-lg w-full">
                   <p>{gm.name}</p>
+
                   <p
                     className={`${
                       groupMemberBalance?.groupBalances?.membersExpense?.[index]
                         .balance < 0
                         ? `text-red-600`
                         : `text-green-600`
-                    } flex gap-3`}
+                    } flex flex-col text-2xl font-semibold`}
                   >
-                    <span>
+                    {formatCurrency(
+                      groupMemberBalance?.groupBalances?.membersExpense?.[index]
+                        .balance,
+                    )}
+                    <span className=" text-sm font-normal">
                       {groupMemberBalance?.groupBalances?.membersExpense?.[
                         index
                       ].balance < 0
                         ? "Owes"
                         : "is Owed"}
                     </span>
-                    {formatCurrency(
-                      groupMemberBalance?.groupBalances?.membersExpense?.[index]
-                        .balance,
-                    )}
                   </p>
                 </div>
               ))}
             </div>
           </div>
           <div className="w-2xl justify-center mt-3 mb-3">
-            <table className="table-auto w-full mt-5">
-              <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
-                <tr>
-                  <th>From</th>
-                  <th>To</th>
-                  <th>Amount</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody className="">
-                {pendingSettlements.map((ps) => (
+            <h2 className="text-2xl font-semibold">Pending Settlements</h2>
+            {pendingSettlements?.length > 0 ? (
+              <table className="table-auto w-full mt-5">
+                <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
                   <tr>
-                    <td>{ps?.from?.member_name}</td>
-                    <td>{ps?.to?.member_name}</td>
-
-                    <td>{formatCurrency(ps?.amount)}</td>
-                    <td>
-                      <button
-                        onClick={() => {
-                          navigate("/settle");
-                        }}
-                        className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
-                      >
-                        Settle Payments
-                      </button>
-                    </td>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Amount</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="">
+                  {pendingSettlements.map(
+                    (ps) =>
+                      ps.amount != 0 && (
+                        <tr>
+                          <td>{ps?.from?.member_name}</td>
+                          <td>{ps?.to?.member_name}</td>
+
+                          <td className="font-semibold">
+                            {formatCurrency(ps?.amount)}
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => {
+                                navigate("/settle");
+                              }}
+                              className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
+                            >
+                              Settle Payments
+                            </button>
+                          </td>
+                        </tr>
+                      ),
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <p className="mt-3">No Pending Settlements.</p>
+            )}
           </div>
         </div>
 
@@ -198,32 +209,36 @@ export default function Dashboard() {
           </div>
 
           <div className="">
-            <table className="table-auto w-full mt-5">
-              <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
-                <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Paid By</th>
-                  <th>Amount</th>
-                  <th>Split Type</th>
-                </tr>
-              </thead>
-              <tbody className="">
-                {groupExpense.map((expense) => (
-                  <tr key={expense.id} className=" ">
-                    <td>{formatDate(expense?.date)}</td>
-                    <td>{expense.description}</td>
-                    <td>{expense?.Member?.name}</td>
-                    <td>{formatCurrency(expense?.amount)}</td>
-                    <td className="mt-6">
-                      <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
-                        {expense.split_type}
-                      </p>
-                    </td>
+            {groupExpense.length > 0 ? (
+              <table className="table-auto w-full mt-5">
+                <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Paid By</th>
+                    <th>Amount</th>
+                    <th>Split Type</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="">
+                  {groupExpense.map((expense) => (
+                    <tr key={expense.id} className=" ">
+                      <td>{formatDate(expense?.date)}</td>
+                      <td>{expense.description}</td>
+                      <td>{expense?.Member?.name}</td>
+                      <td>{formatCurrency(expense?.amount)}</td>
+                      <td className="mt-6">
+                        <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
+                          {expense.split_type}
+                        </p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No Expense in the Group</p>
+            )}
           </div>
         </div>
       </div>

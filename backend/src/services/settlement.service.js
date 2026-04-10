@@ -40,16 +40,57 @@ exports.getSettelementSuggest = async (groupId) => {
         member_id: member.id,
       },
     });
-    const memberBalance = memberExpense - expenseGiveBack;
-    // console.log("member expanse did", memberExpense);
-    // console.log("give back", expenseGiveBack);
-    // console.log("balance ", memberBalance);
+    console.log(expenIdsArr);
+
+    const settlementReceived = await Settlement.sum("amount", {
+      where: {
+        paid_to: member.id,
+      },
+    });
+
+    const settlementPaid = await Settlement.sum("amount", {
+      where: {
+        paid_by: member.id,
+      },
+    });
+
+    const memberBalance =
+      parseFloat(memberExpense || 0).toFixed(2) -
+      parseFloat(expenseGiveBack || 0).toFixed(2);
+
+    let balanceAfterSettlement;
+
+    // if (memberBalance >= 0) {
+    //   balanceAfterSettlement =
+    //     Number(memberBalance) -
+    //     Number(parseFloat(settlementPaid || 0).toFixed(2)) +
+    //     Number(parseFloat(settlementReceived || 0).toFixed(2));
+    // }
+
+    balanceAfterSettlement =
+      Number(memberBalance || 0) +
+      Number(parseFloat(settlementPaid || 0).toFixed(2)) -
+      Number(parseFloat(settlementReceived || 0).toFixed(2));
+
+    console.log("for member id", member.id);
+    console.log(
+      "member expanse did",
+      parseFloat(memberExpense || 0).toFixed(2),
+    );
+    console.log("give back", parseFloat(expenseGiveBack || 0).toFixed(2));
+    console.log("balance ", memberBalance);
+    console.log(
+      "settlementreceived ",
+      parseFloat(settlementReceived || 0).toFixed(2),
+    );
+    console.log("settlementPaid", parseFloat(settlementPaid || 0).toFixed(2));
+    console.log("balance after settlement", balanceAfterSettlement);
 
     membersExpense.push({
       member_id: member.id,
       member_name: member.name,
       expense: memberExpense,
-      balance: memberBalance,
+      balance: parseFloat(balanceAfterSettlement).toFixed(2),
     });
   }
 
@@ -105,6 +146,7 @@ exports.getSettelementSuggest = async (groupId) => {
 
 exports.addSettlement = async (groupId, data) => {
   try {
+    
     const settlement = Settlement.create({
       group_id: groupId,
       paid_by: data.paid_by,

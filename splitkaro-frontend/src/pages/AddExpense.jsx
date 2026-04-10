@@ -137,56 +137,52 @@ export default function AddExpense() {
           </select>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-6">
           <div className="flex flex-row  gap-6">
             <div>
-              <label id="description">Description : </label>
+              <label id="description" className="text-lg font-semibold">
+                Description :{" "}
+              </label>
               <input
                 type="text"
                 id="description"
                 name="description"
-                className=" border border-gray-500"
+                className=" border border-gray-400 rounded-lg"
                 value={form.description}
                 onChange={handleFormDataChange}
               />
             </div>
 
             <div>
-              <label id="totalAmount">Total Amount : </label>
+              <label id="totalAmount" className="text-lg font-semibold">
+                Total Amount :{" "}
+              </label>
               <input
                 type="text"
                 id="totalAmount"
                 name="amount"
                 onChange={handleFormDataChange}
-                className=" border border-gray-500"
+                className=" border border-gray-400 rounded-lg"
               />
             </div>
-
-            <div>
-              <label id="paidBy">Paid By : </label>
-              <select
-                name="paid_by"
-                id="paidBy"
-                onChange={handleFormDataChange}
-              >
-                <option value="">Select Paid By</option>
-                {groupMembers.map((gm) => (
-                  <option value={gm.id}>{gm.name}</option>
-                ))}
-              </select>
-            </div>
+          </div>
+          <div className="flex flex-row gap-2">
+            <label className="font-semibold text-lg" htmlFor="date">
+              Date :
+            </label>
+            <input
+              className="border border-gray-400 rounded-lg shadow-md px-2"
+              type="date"
+              name="date"
+              onChange={handleFormDataChange}
+            />
           </div>
 
-          <div className="flex gap-2">
-            <div className="flex flex-row gap-3">
-              <label htmlFor="date">Date :</label>
-              <input type="date" name="date" onChange={handleFormDataChange} />
-            </div>
-
+          <div className="flex items-center gap-4">
             <div className="flex gap-3">
-              <label htmlFor="splitType">Select Split type</label>
+              <label htmlFor="splitType" className="font-semibold text-lg">Select Split type : </label>
               <select
-                className="border border-gray-700"
+                className="border border-gray-400 rounded-lg shadow-md px-2"
                 name="split_type"
                 id="splitType"
                 onChange={(e) => {
@@ -201,10 +197,24 @@ export default function AddExpense() {
                   }
                 }}
               >
-                <option value="">---type---</option>
+                <option value="">Options</option>
                 <option value="equal">Equal</option>
                 <option value="exact">Exact</option>
                 <option value="percentage">Percentage</option>
+              </select>
+            </div>
+            <div>
+              <label id="paidBy" className="font-semibold text-lg">Paid By : </label>
+              <select
+                className="border border-gray-400 rounded-lg shadow-md px-2 "
+                name="paid_by"
+                id="paidBy"
+                onChange={handleFormDataChange}
+              >
+                <option value="">Options</option>
+                {groupMembers.map((gm) => (
+                  <option value={gm.id}>{gm.name}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -230,7 +240,7 @@ export default function AddExpense() {
 
           <div>
             <button
-              className="bg-green-100 text-green-800 font-semibold px-2 py-1 rounded-lg"
+              className={` ${isValid ? "text-green-800 bg-green-100 cursor-pointer" : "text-gray-500 bg-gray-100"} font-semibold px-2 py-1 rounded-lg`}
               onClick={handleExpenseSubmit}
               disabled={!isValid}
             >

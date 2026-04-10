@@ -56,6 +56,7 @@ export default function SettlementPage() {
       setShowMessage(true);
       setTimeout(() => {
         setShowMessage(false);
+        window.location.reload();
       }, 2000);
     }
   };
@@ -91,42 +92,49 @@ export default function SettlementPage() {
             <div className="flex flex-col">
               <h2 className="text-2xl font-semibold">Pending Settlements</h2>
               <div className="w-2xl justify-center">
-                <table className="table-auto w-full mt-5">
-                  <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
-                    <tr>
-                      <th>From</th>
-                      <th>To</th>
-                      <th>Amount</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="">
-                    {pendingSettlements.map((ps) => (
+                {pendingSettlements?.length > 0 ? (
+                  <table className="table-auto w-full mt-5">
+                    <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
                       <tr>
-                        <td>{ps?.from?.member_name}</td>
-                        <td>{ps?.to?.member_name}</td>
-
-                        <td className="font-semibold">
-                          {formatCurrency(ps?.amount)}
-                        </td>
-                        <td>
-                          <button
-                            onClick={() => {
-                              console.log(ps);
-                              setSettleFrom(ps);
-                            }}
-                            className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
-                          >
-                            Record
-                          </button>
-                        </td>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Amount</th>
+                        <th>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="">
+                      {pendingSettlements.map(
+                        (ps) =>
+                          ps.amount != 0 && (
+                            <tr>
+                              <td>{ps?.from?.member_name}</td>
+                              <td>{ps?.to?.member_name}</td>
+
+                              <td className="font-semibold">
+                                {formatCurrency(ps?.amount)}
+                              </td>
+                              <td>
+                                <button
+                                  onClick={() => {
+                                    console.log(ps);
+                                    setSettleFrom(ps);
+                                  }}
+                                  className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
+                                >
+                                  Record
+                                </button>
+                              </td>
+                            </tr>
+                          ),
+                      )}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p>No Pending Settlements.</p>
+                )}
               </div>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col mt-8">
               <h2 className="text-2xl font-semibold">Settlement History</h2>
               <div>
                 <table className="table-auto w-full mt-5">
@@ -158,6 +166,9 @@ export default function SettlementPage() {
                     ))}
                   </tbody>
                 </table>
+                {settlementHistory?.length == 0 && (
+                  <p>No Settlement History Found.</p>
+                )}
               </div>
             </div>
           </div>
