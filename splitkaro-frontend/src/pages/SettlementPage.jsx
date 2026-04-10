@@ -1,26 +1,30 @@
 import { useState, useEffect } from "react";
-import groupExpenseService from "../services/groupExpense.service";
+// import groupExpenseService from "../services/groupExpense.service";
 import groupSettlementService from "../services/settlement.service";
 import { formatCurrency, formatDate } from "../utils/formatter";
+import { useNavigate } from "react-router-dom";
 
-export default function SettlementPage() {
-  const [groupIds, setGroupIds] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+export default function SettlementPage({ selectedId }) {
+  // const [groupIds, setGroupIds] = useState([]);
+  // const [selectedId, setSelectedId] = useState(null);
   const [settleFrom, setSettleFrom] = useState([]);
+  const [selectedPayment, setSelectedPayment] = useState([]);
   const [pendingSettlements, setPendingSettlements] = useState([]);
   const [settlementHistory, setSettlementHistory] = useState([]);
   const [message, setMessage] = useState("");
   const [showMessage, setShowMessage] = useState(false);
 
-  useEffect(() => {
-    const fetchGroupIds = async () => {
-      const data = await groupExpenseService.getGroupId();
-      setGroupIds(data?.groupIds);
-      setSelectedId(data?.groupIds[0]?.id);
-    };
+  const navigate = useNavigate();
 
-    fetchGroupIds();
-  }, []);
+  // useEffect(() => {
+  //   const fetchGroupIds = async () => {
+  //     const data = await groupExpenseService.getGroupId();
+  //     setGroupIds(data?.groupIds);
+  //     setSelectedId(data?.groupIds[0]?.id);
+  //   };
+
+  //   fetchGroupIds();
+  // }, []);
 
   useEffect(() => {
     const fetchPendingSettlements = async () => {
@@ -43,33 +47,33 @@ export default function SettlementPage() {
       amount: settleFrom?.amount,
       date: new Date(),
     };
-    console.log(data);
+    // console.log(data);
 
     const response = await groupSettlementService.addSettlement(
       selectedId,
       data,
     );
-    console.log("called the settle");
-    console.log(response);
+    // console.log("called the settle");
+    // console.log(response);
     if (response.settlement) {
       setMessage(response.message);
       setShowMessage(true);
       setTimeout(() => {
         setShowMessage(false);
-        window.location.reload();
+        navigate("/");
       }, 2000);
     }
   };
 
-  console.log(pendingSettlements);
-  console.log(settlementHistory);
+  // console.log(pendingSettlements);
+  // console.log(settlementHistory);
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className=" mt-4">
-        <h1 className="text-2xl font-bold">Settlement</h1>
+        <h1 className="text-2xl font-bold mb-4">Settlement</h1>
 
-        <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
+        {/* <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
           <label htmlFor="groupId">Change Group Id : </label>
           <select
             className=" border border-amber-700 px-2 rounded-lg"
@@ -85,7 +89,7 @@ export default function SettlementPage() {
               <option value={id.id}>{id.name}</option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <div className="flex flex-row justify-between">
           <div className="flex flex-col">
@@ -116,8 +120,9 @@ export default function SettlementPage() {
                               <td>
                                 <button
                                   onClick={() => {
-                                    console.log(ps);
+                                    // console.log(ps);
                                     setSettleFrom(ps);
+                                    setSelectedPayment(ps);
                                   }}
                                   className="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-lg mt-4 cursor-pointer"
                                 >
@@ -172,7 +177,7 @@ export default function SettlementPage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col w-1/3">
             <h2 className="text-2xl font-semibold">Record Settlement</h2>
             <div className="flex flex-col gap-3">
               <div>
@@ -207,19 +212,36 @@ export default function SettlementPage() {
                 <input
                   type="text"
                   id="amountToPay"
-                  class=" border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
+                  class=" border  text-heading text-sm rounded-base block w-full px-3 py-2.5 shadow-xs"
                   value={settleFrom?.amount}
-                  disabled
+                  onChange={(e) => {
+                    setSettleFrom((prev) => ({
+                      ...prev,
+                      amount: e.target.value,
+                    }));
+                  }}
                   required
                 />
               </div>
               <button
                 className="bg-blue-100 text-blue-800 font-semibold  px-3 py-1 rounded-lg cursor-pointer"
                 onClick={handleSettlementSubmit}
+                disabled={!selectedPayment?.amount > 0}
               >
                 Record Payment
               </button>
-              {showMessage && <p>{message}</p>}
+              {selectedPayment?.amount > 0 && (
+                <p className="bg-yellow-100 text-yellow-800 font-semibold px-3 p-1 rounded-lg text-center  text-lg">
+                  {selectedPayment?.from?.member_name} Owes{" "}
+                  {selectedPayment?.amount} to{" "}
+                  {selectedPayment?.to?.member_name}
+                </p>
+              )}
+              {showMessage && (
+                <p className="bg-green-100 text-green-800 font-semibold px-3 p-1 rounded-lg text-center  text-lg">
+                  {message}
+                </p>
+              )}
             </div>
           </div>
         </div>

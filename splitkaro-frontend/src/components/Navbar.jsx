@@ -16,7 +16,7 @@ export default function Navbar() {
             <Link to={"/"}>Split Karo</Link>
           </h1>
 
-          <div className="flex flex-row gap-3">
+          <div className="flex flex-row gap-5">
             {navLinks.map((l) => (
               <Link key={l.name} className="" to={l.link}>
                 {l.name}

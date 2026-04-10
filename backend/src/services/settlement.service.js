@@ -16,6 +16,14 @@ exports.getSettelementSuggest = async (groupId) => {
     },
   });
 
+  if (!members.length > 0) {
+    const err = new Error(
+      `Can not suggest Settlements as Member does not esits fro  groupId ${groupId}`,
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
   const membersExpense = [];
   for (const member of members) {
     console.log(member.id);
@@ -145,46 +153,47 @@ exports.getSettelementSuggest = async (groupId) => {
 };
 
 exports.addSettlement = async (groupId, data) => {
-  try {
-    
-    const settlement = Settlement.create({
-      group_id: groupId,
-      paid_by: data.paid_by,
-      paid_to: data.paid_to,
-      amount: data.amount,
-      date: data.date,
-    });
+  const settlement = Settlement.create({
+    group_id: groupId,
+    paid_by: data.paid_by,
+    paid_to: data.paid_to,
+    amount: data.amount,
+    date: data.date,
+  });
 
-    return settlement;
-  } catch (error) {
-    console.log(error);
-  }
+  
+
+  return settlement;
 };
 
 exports.getSettlementHistory = async (groupId) => {
-  try {
-    const settHistory = await Settlement.findAll({
-      where: {
-        group_id: groupId,
+  const settHistory = await Settlement.findAll({
+    where: {
+      group_id: groupId,
+    },
+    include: [
+      {
+        model: Member,
+        as: "paidBy",
+        attributes: ["id", "name"],
       },
-      include: [
-        {
-          model: Member,
-          as: "paidBy",
-          attributes: ["id", "name"],
-        },
-        {
-          model: Member,
-          as: "paidTo",
-          attributes: ["id", "name"],
-        },
-      ],
-    });
+      {
+        model: Member,
+        as: "paidTo",
+        attributes: ["id", "name"],
+      },
+    ],
+  });
 
-    console.log(settHistory);
-
-    return settHistory;
-  } catch (error) {
-    console.log(error);
+  if (!settHistory.length > 0) {
+    const err = new Error(
+      `No Settlement History Found for group id: ${groupId}`,
+    );
+    err.statusCode = 400;
+    throw err;
   }
+
+  // console.log(settHistory);
+
+  return settHistory;
 };

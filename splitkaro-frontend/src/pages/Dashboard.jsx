@@ -4,26 +4,31 @@ import groupExpenseService from "../services/groupExpense.service";
 import groupSettlementService from "../services/settlement.service";
 import { useNavigate } from "react-router-dom";
 import { formatCurrency, formatDate } from "../utils/formatter";
+import useDebounce from "../hooks/useDebounce";
 
-export default function Dashboard() {
-  const [groupIds, setGroupIds] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+export default function Dashboard({ selectedId, groupIds }) {
+  // const [groupIds, setGroupIds] = useState([]);
+  // const [selectedId, setSelectedId] = useState(null);
   const [groupExpense, setGroupexpense] = useState([]);
   const [groupData, setGroupData] = useState([]);
   const [groupMemberBalance, setGroupMemberBalance] = useState([]);
   const [pendingSettlements, setPendingSettlements] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const debouncedValue = useDebounce(searchTerm, 1000);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchGroupIds = async () => {
-      const data = await groupExpenseService.getGroupId();
-      setGroupIds(data?.groupIds);
-      setSelectedId(data?.groupIds[0]?.id);
-    };
+  // useEffect(() => {
+  //   const fetchGroupIds = async () => {
+  //     const data = await groupExpenseService.getGroupId();
+  //     setGroupIds(data?.groupIds);
+  //     setSelectedId(data?.groupIds[0]?.id);
+  //   };
 
-    fetchGroupIds();
-  }, []);
+  //   fetchGroupIds();
+  // }, []);
+
   useEffect(() => {
     const fetchPendingSettlements = async () => {
       const data =
@@ -48,19 +53,26 @@ export default function Dashboard() {
     fetchGroupExpenseData();
   }, [selectedId]);
 
-  console.log(groupIds);
-  console.log(groupExpense);
-  console.log(groupData);
-  console.log(groupMemberBalance);
-  console.log(
-    groupIds?.filter((gr) => {
-      return gr.id == selectedId;
-    }),
+  // console.log(groupIds);
+  // console.log(groupExpense);
+  // console.log(groupData);
+  // console.log(groupMemberBalance);
+  // console.log(
+  //   groupIds?.filter((gr) => {
+  //     return gr.id == selectedId;
+  //   }),
+  // );
+
+  // console.log(debouncedValue);
+  const filteredExpense = groupExpense?.filter((ge) =>
+    ge?.Member?.name?.toLowerCase().includes(debouncedValue.toLowerCase()),
   );
+
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
-        <label htmlFor="groupId">Change Group Id : </label>
+    <div className="max-w-7xl mx-auto mt-4">
+      <h1 className="text-2xl font-bold mb-4">Group Overview</h1>
+      {/* <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
+        <label htmlFor="groupId">Change Group : </label>
         <select
           className=" border border-amber-700 px-2 rounded-lg"
           name=""
@@ -70,16 +82,15 @@ export default function Dashboard() {
             setSelectedId(e.target.value);
           }}
         >
-          <option value="">Group Id</option>
           {groupIds.map((id) => (
             <option value={id.id}>{id.name}</option>
           ))}
         </select>
-      </div>
+      </div> */}
       <div>
         <div>
-          <h2 className="font-semibold text-2xl">
-            Grop Name:{" "}
+          <h2 className="font-semibold text-2xl bg-purple-50 text-purple-800 w-fit px-3 py-1 rounded-lg">
+            Group Name:{" "}
             {
               groupIds?.filter((gr) => {
                 return gr.id == selectedId;
@@ -95,8 +106,15 @@ export default function Dashboard() {
             <p className="font-semibold">Member Expense </p>
             <div className="flex flex-row justify-between gap-4 mb-3">
               {groupMemberBalance?.groupBalances?.members?.map((gm, index) => (
-                <div className="bg-gray-100 p-4 rounded-lg w-full">
-                  <p>{gm.name}</p>
+                <div
+                  className={`bg-gray-100 border-t-4 ${
+                    groupMemberBalance?.groupBalances?.membersExpense?.[index]
+                      .balance < 0
+                      ? `border-red-600`
+                      : `border-green-600`
+                  }  p-4 rounded-lg w-full`}
+                >
+                  <p className="font-semibold text-lg">{gm.name}</p>
 
                   <p
                     className={`${
@@ -125,7 +143,7 @@ export default function Dashboard() {
           <div className="w-2xl justify-center mt-3 mb-3">
             <h2 className="text-2xl font-semibold">Pending Settlements</h2>
             {pendingSettlements?.length > 0 ? (
-              <table className="table-auto w-full mt-5">
+              <table className="table-auto w-full mt-5 mb-5">
                 <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
                   <tr>
                     <th>From</th>
@@ -139,11 +157,17 @@ export default function Dashboard() {
                     (ps) =>
                       ps.amount != 0 && (
                         <tr>
-                          <td>{ps?.from?.member_name}</td>
-                          <td>{ps?.to?.member_name}</td>
+                          <td>
+                            <p className="mt-4">{ps?.from?.member_name} </p>
+                          </td>
+                          <td>
+                            <p className="mt-4">{ps?.to?.member_name} </p>
+                          </td>
 
                           <td className="font-semibold">
-                            {formatCurrency(ps?.amount)}
+                            <p className="mt-4">
+                              {formatCurrency(ps?.amount)}{" "}
+                            </p>
                           </td>
                           <td>
                             <button
@@ -196,15 +220,26 @@ export default function Dashboard() {
         </div>
 
         <div className="flex flex-col gap-3 mt-4">
-          <div className="flex justify-between">
-            <h3 className="text-xl font-semibold">All Expenses</h3>
-            <div className="flex flex-row-reverse ">
-              <Link
-                to="/add-expense"
-                className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg self-end font-semibold"
-              >
-                Add Expense
-              </Link>
+          <div className="flex-col justify-between">
+            <h3 className="text-2xl font-semibold">All Expenses</h3>
+            <div className="flex justify-between items-center mt-3">
+              <div>
+                <input
+                  placeholder="Search by member here"
+                  className="px-3 py-1 border border-gray-300 rounded-lg w-80"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-row ">
+                <Link
+                  to="/add-expense"
+                  className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg self-end font-semibold"
+                >
+                  Add Expense
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -221,14 +256,24 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="">
-                  {groupExpense.map((expense) => (
+                  {filteredExpense.map((expense) => (
                     <tr key={expense.id} className=" ">
-                      <td>{formatDate(expense?.date)}</td>
-                      <td>{expense.description}</td>
-                      <td>{expense?.Member?.name}</td>
-                      <td>{formatCurrency(expense?.amount)}</td>
-                      <td className="mt-6">
-                        <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
+                      <td>
+                        <p className="mt-4"> {formatDate(expense?.date)} </p>
+                      </td>
+                      <td>
+                        <p className="mt-4">{expense.description} </p>
+                      </td>
+                      <td>
+                        <p className="mt-4">{expense?.Member?.name} </p>
+                      </td>
+                      <td>
+                        <p className="mt-4">
+                          {formatCurrency(expense?.amount)}{" "}
+                        </p>
+                      </td>
+                      <td>
+                        <p className="mt-4 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
                           {expense.split_type}
                         </p>
                       </td>

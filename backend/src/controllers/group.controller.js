@@ -51,6 +51,7 @@ exports.addGroupExpense = async (req, res, next) => {
     const expense = await addGroupExpenseData(groupId, data);
     res.status(200).json({ message: "Group Expense Added !!", expense });
   } catch (error) {
+    console.log("error caught in controller")
     next(error);
   }
 };

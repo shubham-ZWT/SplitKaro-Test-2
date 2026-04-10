@@ -2,14 +2,17 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import groupExpenseService from "../services/groupExpense.service";
+import { useNavigate } from "react-router-dom";
 
-export default function AddExpense() {
-  const [groupIds, setGroupIds] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+export default function AddExpense({ selectedId }) {
+  // const [groupIds, setGroupIds] = useState([]);
+  // const [selectedId, setSelectedId] = useState(null);
   const [groupMembers, setGroupMembers] = useState([]);
-  const [splitTypeShow, setSplitTypeShow] = useState(false);
+  const [splitTypeShow, setSplitTypeShow] = useState(null);
   const [message, setMessage] = useState("");
   const [showMessage, setShowMessage] = useState(false);
+
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     paid_by: "",
@@ -19,15 +22,15 @@ export default function AddExpense() {
     date: "",
   });
 
-  useEffect(() => {
-    const fetchGroupIds = async () => {
-      const data = await groupExpenseService.getGroupId();
-      setGroupIds(data?.groupIds);
-      setSelectedId(data?.groupIds[0]?.id);
-    };
+  // useEffect(() => {
+  //   const fetchGroupIds = async () => {
+  //     const data = await groupExpenseService.getGroupId();
+  //     setGroupIds(data?.groupIds);
+  //     setSelectedId(data?.groupIds[0]?.id);
+  //   };
 
-    fetchGroupIds();
-  }, []);
+  //   fetchGroupIds();
+  // }, []);
 
   useEffect(() => {
     const fetchGroupData = async () => {
@@ -42,7 +45,7 @@ export default function AddExpense() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const initialSplits = {};
+  let initialSplits = {};
   groupMembers?.forEach((obj) => {
     initialSplits[obj.id] = 0;
   });
@@ -51,7 +54,7 @@ export default function AddExpense() {
 
   const handleSplitAmountChange = (memberId, amount) => {
     initialSplits[memberId] = amount;
-    console.log(initialSplits);
+    // console.log(initialSplits);
     // totalSplit = Object.values(initialSplits).reduce(
     //   (sum, value) => Number(sum) + Number(value),
     //   0,
@@ -72,25 +75,25 @@ export default function AddExpense() {
       selectedId,
       data,
     );
+    // console.log("response", response);
 
     if (response.message) {
+      // console.log(response);
       setMessage(response.message);
       setShowMessage(true);
       setTimeout(() => {
         setShowMessage(false);
         setMessage("");
+        navigate("/");
       }, 2000);
     }
 
-    console.log(response);
-    console.log(form);
+    // console.log(response);
+    // console.log(form);
   };
 
-  // const isValid = Number(form.amount) === Number(totalSplit);
-
-  // console.log(totalSplit);
-  console.log(groupMembers);
-  console.log(initialSplits);
+  // console.log(groupMembers);
+  // console.log(initialSplits);
 
   const isValid =
     form.amount > 0 && form.paid_by.length > 0 && form.split_type.length > 0
@@ -118,9 +121,9 @@ export default function AddExpense() {
   return (
     <div className="max-w-7xl mx-auto mt-4">
       <div>
-        <h1 className="text-2xl font-bold">Add Expenses</h1>
-        <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
-          <label htmlFor="groupId">Change Group Id : </label>
+        <h1 className="text-2xl font-bold mb-4">Add Expenses</h1>
+        {/* <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
+          <label htmlFor="groupId">Change Group : </label>
           <select
             className=" border border-amber-700 px-2 rounded-lg"
             name=""
@@ -130,12 +133,11 @@ export default function AddExpense() {
               setSelectedId(Number(e.target.value));
             }}
           >
-            <option value="">Group Id</option>
             {groupIds.map((id) => (
               <option value={id.id}>{id.name}</option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <div className="flex flex-col gap-6">
           <div className="flex flex-row  gap-6">
@@ -147,7 +149,7 @@ export default function AddExpense() {
                 type="text"
                 id="description"
                 name="description"
-                className=" border border-gray-400 rounded-lg"
+                className="border border-gray-400 rounded-lg px-3"
                 value={form.description}
                 onChange={handleFormDataChange}
               />
@@ -162,7 +164,7 @@ export default function AddExpense() {
                 id="totalAmount"
                 name="amount"
                 onChange={handleFormDataChange}
-                className=" border border-gray-400 rounded-lg"
+                className=" border border-gray-400 rounded-lg px-3"
               />
             </div>
           </div>
@@ -180,7 +182,9 @@ export default function AddExpense() {
 
           <div className="flex items-center gap-4">
             <div className="flex gap-3">
-              <label htmlFor="splitType" className="font-semibold text-lg">Select Split type : </label>
+              <label htmlFor="splitType" className="font-semibold text-lg">
+                Select Split type :{" "}
+              </label>
               <select
                 className="border border-gray-400 rounded-lg shadow-md px-2"
                 name="split_type"
@@ -204,7 +208,9 @@ export default function AddExpense() {
               </select>
             </div>
             <div>
-              <label id="paidBy" className="font-semibold text-lg">Paid By : </label>
+              <label id="paidBy" className="font-semibold text-lg">
+                Paid By :{" "}
+              </label>
               <select
                 className="border border-gray-400 rounded-lg shadow-md px-2 "
                 name="paid_by"
@@ -217,37 +223,51 @@ export default function AddExpense() {
                 ))}
               </select>
             </div>
+
+            {splitTypeShow === false && (
+              <p className="bg-yellow-100 text-yellow-800 font-semibold text-lg px-3 py-1 rounded-lg">
+                (for Equal Split each member gets{" "}
+                {form?.amount / Object.keys(initialSplits).length} )
+              </p>
+            )}
           </div>
 
           {splitTypeShow && (
             <div>
-              {groupMembers.map((gm) => (
-                <div>
-                  <p>{gm.name}</p>
-                  <input
-                    type="text"
-                    name="exactAmount"
-                    id=""
-                    className="bg-gray-100 border border-gray-200"
-                    onChange={(e) =>
-                      handleSplitAmountChange(gm.id, e.target.value)
-                    }
-                  />
-                </div>
-              ))}
+              <p className="text-lg font-semibold">Contributions</p>
+              <div className="flex gap-3">
+                {groupMembers.map((gm) => (
+                  <div>
+                    <p>{gm.name}</p>
+                    <input
+                      type="text"
+                      name="exactAmount"
+                      id=""
+                      className="bg-gray-100 border border-gray-200"
+                      onChange={(e) =>
+                        handleSplitAmountChange(gm.id, e.target.value)
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           <div>
             <button
-              className={` ${isValid ? "text-green-800 bg-green-100 cursor-pointer" : "text-gray-500 bg-gray-100"} font-semibold px-2 py-1 rounded-lg`}
+              className={` ${isValid ? "text-green-800 bg-green-100 cursor-pointer" : "text-gray-500 bg-gray-100"} text-lg font-semibold px-3 py-1 rounded-lg`}
               onClick={handleExpenseSubmit}
               disabled={!isValid}
             >
               Save Expense
             </button>
           </div>
-          {showMessage && <p>{message}</p>}
+          {showMessage && (
+            <p className="bg-green-100 text-green-800 font-semibold px-3 p-1 rounded-lg text-center  text-lg">
+              {message}
+            </p>
+          )}
         </div>
       </div>
     </div>

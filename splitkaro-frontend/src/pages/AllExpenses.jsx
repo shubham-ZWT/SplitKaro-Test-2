@@ -2,36 +2,39 @@ import { useState } from "react";
 import { useEffect } from "react";
 import groupExpenseService from "../services/groupExpense.service";
 import { formatCurrency, formatDate } from "../utils/formatter";
+import { useNavigate } from "react-router-dom";
 
-export default function AllExpenses() {
-  const [groupIds, setGroupIds] = useState([]);
-  const [currentGroupId, setCurrentGroupId] = useState(1);
+export default function AllExpenses({ selectedId }) {
+  // const [groupIds, setGroupIds] = useState([]);
+  // const [currentGroupId, setCurrentGroupId] = useState(1);
   const [expenses, setExpenses] = useState([]);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchAllgroupsIds = async () => {
-      const AllgroupIds = await groupExpenseService.getGroupId();
-      setGroupIds(AllgroupIds.groupIds);
-      setCurrentGroupId(1);
-    };
-    fetchAllgroupsIds();
-  }, []);
+  // useEffect(() => {
+  //   const fetchAllgroupsIds = async () => {
+  //     const AllgroupIds = await groupExpenseService.getGroupId();
+  //     setGroupIds(AllgroupIds.groupIds);
+  //     setCurrentGroupId(1);
+  //   };
+  //   fetchAllgroupsIds();
+  // }, []);
 
   useEffect(() => {
     const fetchGroupExpenses = async () => {
-      const data = await groupExpenseService.getAllExpenses(currentGroupId);
+      const data = await groupExpenseService.getAllExpenses(selectedId);
       setExpenses(data.groupExpenses);
     };
     fetchGroupExpenses();
-  }, [currentGroupId]);
+  }, [selectedId]);
 
   const handleDeleteExpense = async (id) => {
     if (window.confirm("Are you sure you want to delete this Expense?")) {
-      const deleteExpense = await groupExpenseService.deleteExpenseById(id);
-      console.log(deleteExpense);
+       await groupExpenseService.deleteExpenseById(id);
+      // console.log(deleteExpense);
+      navigate("/");
       setExpenses(expenses.filter((e) => e.id !== id));
     } else {
-      console.log("not deleted");
+      // console.log("not deleted");
     }
   };
 
@@ -40,14 +43,15 @@ export default function AllExpenses() {
   //   setCurrentGroupId(event.target.value);
   // };
 
-  console.log(groupIds);
+  // console.log(groupIds);
 
-  console.log(expenses);
+  // console.log(expenses);
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto mt-4">
+      <h1 className="text-2xl font-bold mb-4">All Expenses</h1>
       <div>
-        <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
-          <label htmlFor="groupId">Change Group Id : </label>
+        {/* <div className="bg-amber-100 w-fit p-2 rounded-lg flex gap-2 items-center font-semibold mt-4 mb-4 text-lg text-amber-800">
+          <label htmlFor="groupId">Change Group : </label>
           <select
             className=" border border-amber-700 px-2 rounded-lg"
             name=""
@@ -59,10 +63,12 @@ export default function AllExpenses() {
           >
             <option value="">Group Id</option>
             {groupIds.map((id) => (
-              <option key={id.id} value={id.id}>{id.name}</option>
+              <option key={id.id} value={id.id}>
+                {id.name}
+              </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <table className="table-auto w-full mt-5">
           <thead className="bg-base-200 text-left text-gray-700  tracking-wider">
@@ -77,11 +83,19 @@ export default function AllExpenses() {
           </thead>
           <tbody className="">
             {expenses.map((expense) => (
-              <tr key={expense.id} className="bg-card mt-6 ">
-                <td>{formatDate(expense.date)}</td>
-                <td>{expense.description}</td>
-                <td>{expense.Member?.name}</td>
-                <td className="font-semibold">{formatCurrency(expense.amount)}</td>
+              <tr key={expense.id} className="">
+                <td>
+                  <p className="mt-6">{formatDate(expense.date)}</p>
+                </td>
+                <td>
+                  <p className="mt-6">{expense.description}</p>
+                </td>
+                <td>
+                  <p className="mt-6">{expense.Member?.name} </p>
+                </td>
+                <td className="font-semibold">
+                  <p className="mt-6">{formatCurrency(expense.amount)}</p>
+                </td>
                 <td>
                   <p className="mt-6 bg-amber-50 text-amber-800 px-3 py-1 rounded-lg  font-semibold  w-fit text">
                     {expense.split_type}
@@ -99,6 +113,11 @@ export default function AllExpenses() {
             ))}
           </tbody>
         </table>
+        {expenses.length == 0 && (
+          <p className="text-center w-full mt-5 text-gray-500">
+            See All Your Expenses here{" "}
+          </p>
+        )}
       </div>
     </div>
   );
